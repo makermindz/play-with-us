@@ -1,0 +1,1810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrated STEAM Simulation Hub</title>
+    <!-- Load Tailwind CSS for utility classes and the Inter font -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'green-primary': '#27ae60', /* Darker Green */
+                        'green-secondary': '#2ecc71', /* Brighter Green */
+                        'green-light': '#f4fff4',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Base Styles and Layout Resets */
+        body {
+            background-color: #ffffff; /* Light background for the whole page */
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Generic container for all game sections */
+        .game-card {
+            margin-top: 2.5rem;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            background-color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Two-column layout responsiveness */
+        .game-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .game-grid {
+                flex-direction: row;
+            }
+        }
+        
+        /* Consistent Canvas/Sim/Graph Area Styles */
+        .sim-area {
+            width: 100%;
+            height: 300px; /* Reduced height to fit more games */
+            background-color: #e9f5e9; 
+            border: 2px solid #2ecc71;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            position: relative;
+        }
+        
+        /* Button and Input Styling */
+        input[type="number"], input[type="text"], select {
+            -moz-appearance: textfield; 
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+        }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .btn-action {
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+        }
+        .btn-action:hover {
+            opacity: 0.9;
+        }
+        .btn-action:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+        .info-panel {
+            min-height: 280px; /* Ensure info panel is tall enough */
+        }
+
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-6xl w-full mx-auto">
+        <h1 class="text-4xl font-extrabold text-gray-800 border-b-4 border-green-secondary pb-4 mb-8 text-center">
+            STEAM Simulation Hub
+        </h1>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 1: LINEAR REGRESSION FITTER (Math/Data Science) -->
+        <!-- ========================================================================================= -->
+        <div id="game-regression" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Linear Regression Fitter
+            </h2>
+
+            <div class="game-grid">
+                
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Statistical Modeling</h3>
+                    <p class="text-gray-700 mb-4">Linear Regression is a statistical method used to model the relationship between a scalar response and explanatory variables. It assumes a linear relationship, represented by the equation:</p>
+                    <div class="bg-white p-3 rounded-lg shadow-md mb-4 text-center text-lg font-bold text-gray-900">
+                        y = m * x + b
+                    </div>
+                    <p class="text-gray-700 mb-4">The goal is to find the slope (m) and y-intercept (b) that minimizes the Sum of Squared Errors between the data points and the line. You must adjust m and b to manually find the best fit line for the data points.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col">
+                    <div class="controls flex flex-wrap gap-4 items-center justify-center p-3 bg-gray-100 rounded-lg shadow-inner mb-4">
+                        <div>
+                            <label for="slope" class="text-sm font-semibold text-gray-700">Slope (m):</label>
+                            <input type="number" id="slope" step="0.1" value="0.5" class="w-20 p-2 border border-gray-300 rounded-md text-center">
+                        </div>
+                        <div>
+                            <label for="intercept" class="text-sm font-semibold text-gray-700">Intercept (b):</label>
+                            <input type="number" id="intercept" step="0.1" value="1.0" class="w-20 p-2 border border-gray-300 rounded-md text-center">
+                        </div>
+                        <button onclick="updateRegressionPlot()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                            Fit Line
+                        </button>
+                    </div>
+                    <canvas id="regressionCanvas" class="sim-area"></canvas>
+                    <div id="regressionMessage" class="text-center mt-4 p-2 bg-yellow-100 text-gray-800 font-semibold rounded-lg">
+                        Adjust m and b to minimize the distance to the points.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 2: QUADRATIC FUNCTION EXPLORER (Math) - NEW REPLACEMENT -->
+        <!-- ========================================================================================= -->
+        <div id="game-quadratic" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Quadratic Function Explorer
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Parabola Analysis</h3>
+                    <p class="text-gray-700 mb-4">A quadratic function produces a U-shaped curve called a parabola. The standard form of the equation is:</p>
+                    <div class="bg-white p-3 rounded-lg shadow-md mb-4 text-center text-lg font-bold text-gray-900">
+                        y = ax<sup>2</sup> + bx + c
+                    </div>
+                    <p class="text-gray-700 mb-4">The coefficient a controls the direction and width. b and c shift the parabola's position. The vertex (minimum or maximum point) is located at x = -b / (2a).</p>
+                    <p class="text-gray-700">Use the sliders to see how each coefficient impacts the graph's shape and position.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col">
+                    <div class="controls flex flex-col gap-2 items-center justify-center p-3 bg-gray-100 rounded-lg shadow-inner mb-4">
+                        <div class="w-full flex items-center gap-2">
+                            <label class="text-sm font-semibold text-gray-700 w-8">a:</label>
+                            <input type="range" id="qa" min="-2" max="2" step="0.1" value="1" class="flex-grow" oninput="drawQuadratic()">
+                            <span id="qa-val" class="font-bold text-green-primary w-10 text-center">1.0</span>
+                        </div>
+                        <div class="w-full flex items-center gap-2">
+                            <label class="text-sm font-semibold text-gray-700 w-8">b:</label>
+                            <input type="range" id="qb" min="-5" max="5" step="0.1" value="0" class="flex-grow" oninput="drawQuadratic()">
+                            <span id="qb-val" class="font-bold text-green-primary w-10 text-center">0.0</span>
+                        </div>
+                        <div class="w-full flex items-center gap-2">
+                            <label class="text-sm font-semibold text-gray-700 w-8">c:</label>
+                            <input type="range" id="qc" min="-5" max="5" step="0.1" value="0" class="flex-grow" oninput="drawQuadratic()">
+                            <span id="qc-val" class="font-bold text-green-primary w-10 text-center">0.0</span>
+                        </div>
+                    </div>
+                    <canvas id="quadraticCanvas" class="sim-area"></canvas>
+                    <div id="quadraticMessage" class="text-center mt-4 p-2 bg-blue-100 text-gray-800 font-semibold rounded-lg">
+                        Vertex: (0.00, 0.00). Roots: 0.00, 0.00.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 3: HEAT TRANSFER SIMULATOR (Science/Physics) -->
+        <!-- ========================================================================================= -->
+        <div id="game-heat" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Heat Transfer Simulator
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Thermal Dynamics</h3>
+                    <p class="text-gray-700 mb-4">Heat transfer occurs via three main mechanisms: Conduction (transfer through contact), Convection (transfer through fluid motion), and Radiation (transfer via electromagnetic waves).</p>
+                    <p class="text-gray-700 mb-4">This simulation models conduction between two objects. The rate of heat flow is proportional to the Temperature Difference and the Thermal Conductivity of the material.</p>
+                    <p class="text-gray-700">Watch how quickly the cold block (Blue) reaches thermal equilibrium with the hot block (Red) based on the material's conductivity.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col">
+                    <div class="controls flex gap-4 items-center justify-center p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <label for="conductivity" class="text-sm font-semibold text-gray-700">Material:</label>
+                        <select id="conductivity" class="p-2 border border-gray-300 rounded-md" onchange="resetHeatSim()">
+                            <option value="0.01">Wood (Low)</option>
+                            <option value="0.5">Steel (Medium)</option>
+                            <option value="1.5">Copper (High)</option>
+                        </select>
+                        <button onclick="startHeatSim()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                            Start/Reset Sim
+                        </button>
+                    </div>
+                    <canvas id="heatCanvas" class="sim-area"></canvas>
+                    <div id="heatMessage" class="text-center mt-4 p-2 bg-blue-100 text-gray-800 font-semibold rounded-lg">
+                        Block 1 Temp: 80°C | Block 2 Temp: 20°C
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 4: DNA COMPLEMENT GENERATOR (Science/Biology) -->
+        <!-- ========================================================================================= -->
+        <div id="game-dna" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                DNA Complement Generator
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Molecular Biology</h3>
+                    <p class="text-gray-700 mb-4">DNA consists of two strands linked by base pairs. The four nitrogenous bases are Adenine (A), Thymine (T), Guanine (G), and Cytosine (C). Base pairing is always specific:</p>
+                    <div class="bg-white p-3 rounded-lg shadow-md mb-4 text-center text-lg font-bold text-gray-900">
+                        A pairs with T | G pairs with C
+                    </div>
+                    <p class="text-gray-700">The goal is to determine the complementary strand for a given DNA sequence. This process is essential for DNA replication and transcription.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-center">
+                    <div class="flex flex-col gap-4 p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <label for="dna-input" class="text-sm font-semibold text-gray-700">Original Strand (A, T, G, C):</label>
+                        <input type="text" id="dna-input" value="ATGCGTAG" class="p-2 border border-gray-300 rounded-md text-center uppercase" placeholder="Enter DNA Sequence">
+                        <button onclick="generateComplement()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                            Generate Complement
+                        </button>
+                    </div>
+                    <div class="w-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700 mb-2">Complementary Strand:</p>
+                        <p id="dna-output" class="text-xl font-mono text-red-600 break-all">TACGCATC</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 5: ARRAY SORTING CHALLENGE (CS/Tech) -->
+        <!-- ========================================================================================= -->
+        <div id="game-sort" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Array Sorting Challenge
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Algorithm Efficiency</h3>
+                    <p class="text-gray-700 mb-4">Sorting algorithms are fundamental to computer science. They arrange elements of a list in a specified order. Common methods include Bubble Sort, Merge Sort, and Quick Sort.</p>
+                    <p class="text-gray-700 mb-4">This challenge visualizes an array of numbers. Your task is to apply an algorithm (Bubble Sort is used here) to arrange the numbers from smallest to largest.</p>
+                    <p class="text-gray-700">Use the buttons to step through the sorting process and observe how values are swapped until the array is completely sorted.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col">
+                    <div class="controls flex gap-2 items-center justify-center p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <button onclick="resetArray()" class="btn-action px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                            Reset Array
+                        </button>
+                        <button onclick="sortStep()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                            Next Step
+                        </button>
+                    </div>
+                    <canvas id="sortCanvas" class="sim-area"></canvas>
+                    <div id="sortMessage" class="text-center mt-4 p-2 bg-blue-100 text-gray-800 font-semibold rounded-lg">
+                        Initial Array. Press Next Step to begin Bubble Sort.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 6: CENTER OF GRAVITY FINDER (Physics) -->
+        <!-- ========================================================================================= -->
+        <div id="game-cog" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Center of Gravity Finder
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Equilibrium and Stability</h3>
+                    <p class="text-gray-700 mb-4">The Center of Gravity (CoG) is the imaginary point where the total weight of an object is considered to be concentrated. An object is stable only if its CoG is above its base of support.</p>
+                    <p class="text-gray-700 mb-4">In a rigid body, the CoG is the weighted average of the positions of all the mass elements.</p>
+                    <p class="text-gray-700">Click anywhere in the area to add a mass block (Black Dot). The simulation will instantly calculate and display the system's overall Center of Gravity (Red Cross).</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col">
+                    <canvas id="cogCanvas" class="sim-area cursor-pointer" onclick="addMass(event)"></canvas>
+                    <div class="controls flex gap-4 items-center justify-center p-3 bg-gray-100 rounded-lg shadow-inner w-full mt-4">
+                        <button onclick="resetCogSim()" class="btn-action px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">
+                            Clear Masses
+                        </button>
+                    </div>
+                    <div id="cogMessage" class="text-center mt-4 p-2 bg-blue-100 text-gray-800 font-semibold rounded-lg">
+                        CoG: (X: 0, Y: 0). Click to add mass.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 7: COLOR THEORY MIXER (Art/Science) -->
+        <!-- ========================================================================================= -->
+        <div id="game-color" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Color Theory Mixer (RGB)
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Additive Light Theory</h3>
+                    <p class="text-gray-700 mb-4">The RGB (Red, Green, Blue) model is an additive color system used in digital displays. Additive means that light is mixed: starting with black, adding R, G, and B light creates brighter colors.</p>
+                    <p class="text-gray-700 mb-4">The intensity of each color channel is measured from 0 (off) to 255 (full intensity). Equal amounts of all three at 255 produce white.</p>
+                    <p class="text-gray-700">Adjust the three sliders to see the resulting color mixture. Learn how different levels of light create complex shades.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col">
+                    <div class="controls flex flex-col gap-2 items-center justify-center p-3 bg-gray-100 rounded-lg shadow-inner mb-4">
+                        <div class="w-full flex items-center gap-2">
+                            <label class="text-sm font-semibold text-gray-700 w-8 text-red-600">R:</label>
+                            <input type="range" id="colorR" min="0" max="255" value="128" class="flex-grow" oninput="updateColorMixer()">
+                            <span id="colorR-val" class="font-bold text-gray-800 w-10 text-center">128</span>
+                        </div>
+                        <div class="w-full flex items-center gap-2">
+                            <label class="text-sm font-semibold text-gray-700 w-8 text-green-500">G:</label>
+                            <input type="range" id="colorG" min="0" max="255" value="128" class="flex-grow" oninput="updateColorMixer()">
+                            <span id="colorG-val" class="font-bold text-gray-800 w-10 text-center">128</span>
+                        </div>
+                        <div class="w-full flex items-center gap-2">
+                            <label class="text-sm font-semibold text-gray-700 w-8 text-blue-600">B:</label>
+                            <input type="range" id="colorB" min="0" max="255" value="128" class="flex-grow" oninput="updateColorMixer()">
+                            <span id="colorB-val" class="font-bold text-gray-800 w-10 text-center">128</span>
+                        </div>
+                    </div>
+                    <div id="colorDisplay" class="sim-area flex items-center justify-center text-white text-2xl font-bold" style="background-color: rgb(128, 128, 128);">
+                        RGB(128, 128, 128)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 8: CAESAR CIPHER ENCRYPTION (CS/Math) -->
+        <!-- ========================================================================================= -->
+        <div id="game-cipher" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Caesar Cipher Encryption
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Cryptography Basics</h3>
+                    <p class="text-gray-700 mb-4">The Caesar Cipher is one of the simplest and most widely known encryption techniques. It is a type of substitution cipher in which each letter in the plaintext is replaced by a letter some fixed number of positions down the alphabet.</p>
+                    <p class="text-gray-700 mb-4">This fixed number is the Shift Key. Mathematically, this is a form of modular arithmetic (e.g., if you shift 'Z' by 1, you wrap around to 'A').</p>
+                    <p class="text-gray-700">Enter a message and choose a shift value to encrypt it. The key (shift) determines how secure the message is.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-center">
+                    <div class="flex flex-col gap-4 p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <label for="cipher-text" class="text-sm font-semibold text-gray-700">Plain Text (A-Z):</label>
+                        <input type="text" id="cipher-text" value="HELLO WORLD" class="p-2 border border-gray-300 rounded-md text-center uppercase">
+                        
+                        <div class="flex items-center gap-4 justify-between">
+                            <label for="cipher-shift" class="text-sm font-semibold text-gray-700">Shift Key (1-25):</label>
+                            <input type="number" id="cipher-shift" min="1" max="25" value="3" class="w-16 p-2 border border-gray-300 rounded-md text-center">
+                            <button onclick="applyCipher()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                                Encrypt
+                            </button>
+                        </div>
+                    </div>
+                    <div class="w-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700 mb-2">Cipher Text:</p>
+                        <p id="cipher-output" class="text-xl font-mono text-red-600 break-all">KHOOR ZRUOG</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 9: UNIT CONVERSION CHALLENGE (Math/Science) -->
+        <!-- ========================================================================================= -->
+        <div id="game-unit" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Unit Conversion Challenge
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Metric System Mastery</h3>
+                    <p class="text-gray-700 mb-4">The ability to convert units is essential in all fields of science and engineering. Conversions rely on knowing the proper conversion factor (ratio) between two units.</p>
+                    <p class="text-gray-700 mb-4">For example, to convert from meters (m) to kilometers (km), you use the factor 1000 m = 1 km.</p>
+                    <p class="text-gray-700">Select the initial unit, enter a value, and select the target unit. The calculator handles common length, mass, and time conversions (e.g., km to miles, kg to lbs, hours to seconds).</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-center">
+                    <div class="flex flex-col gap-3 p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm font-semibold text-gray-700">Value:</label>
+                            <input type="number" id="unit-value" value="10" class="w-20 text-center">
+                            <select id="unit-from" class="flex-grow">
+                                <option value="km">Kilometers (km)</option>
+                                <option value="m">Meters (m)</option>
+                                <option value="mi">Miles (mi)</option>
+                                <option value="kg">Kilograms (kg)</option>
+                            </select>
+                        </div>
+                        <div class="text-center font-bold text-lg text-green-primary">TO</div>
+                        <div class="flex items-center gap-2">
+                            <label class="text-sm font-semibold text-gray-700">Target:</label>
+                            <select id="unit-to" class="flex-grow">
+                                <option value="mi">Miles (mi)</option>
+                                <option value="m">Meters (m)</option>
+                                <option value="km">Kilometers (km)</option>
+                                <option value="lb">Pounds (lb)</option>
+                            </select>
+                            <button onclick="convertUnit()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                                Convert
+                            </button>
+                        </div>
+                    </div>
+                    <div class="w-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700 mb-2">Result:</p>
+                        <p id="unit-output" class="text-xl font-mono text-red-600 break-all">6.21 mi</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 10: SIMPLE HARMONIC MOTION SIMULATOR (Physics) -->
+        <!-- ========================================================================================= -->
+        <div id="game-shm" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Simple Harmonic Motion (SHM)
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Oscillations and Waves</h3>
+                    <p class="text-gray-700 mb-4">Simple Harmonic Motion (SHM) is the oscillatory motion of a system where the restoring force is directly proportional to the displacement. A classic example is a mass attached to a spring.</p>
+                    <p class="text-gray-700 mb-4">The Period (time for one full cycle) and Frequency (cycles per second) are constant. The motion follows a sine wave pattern.</p>
+                    <p class="text-gray-700">Adjust the Mass and Spring Constant (k) to see how the period of the oscillation changes. Higher mass slows the motion; stiffer spring (higher k) speeds it up.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col">
+                    <div class="controls flex flex-wrap gap-4 items-center justify-center p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <div>
+                            <label for="shm-mass" class="text-sm font-semibold text-gray-700">Mass (kg):</label>
+                            <input type="range" id="shm-mass" min="1" max="10" value="5" oninput="updateShm(true)" class="w-20">
+                        </div>
+                        <div>
+                            <label for="shm-k" class="text-sm font-semibold text-gray-700">Spring K:</label>
+                            <input type="range" id="shm-k" min="1" max="10" value="5" oninput="updateShm(true)" class="w-20">
+                        </div>
+                        <button onclick="updateShm(true)" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                            Apply Settings
+                        </button>
+                    </div>
+                    <canvas id="shmCanvas" class="sim-area"></canvas>
+                    <div id="shmMessage" class="text-center mt-4 p-2 bg-blue-100 text-gray-800 font-semibold rounded-lg">
+                        Period: 2.81 s. Frequency: 0.36 Hz.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 11: BINARY TO DECIMAL CONVERTER (CS/Math) -->
+        <!-- ========================================================================================= -->
+        <div id="game-binary" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Binary to Decimal Converter
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Number Systems</h3>
+                    <p class="text-gray-700 mb-4">Computers operate using the Binary System (base-2), which only uses the digits 0 and 1. Humans typically use the Decimal System (base-10).</p>
+                    <p class="text-gray-700 mb-4">Each digit in a binary number represents a power of two: ..., 16, 8, 4, 2, 1. To convert, you multiply the binary digit by its corresponding power of two and sum the results.</p>
+                    <p class="text-gray-700">Enter an 8-bit binary string (e.g., 10101010) and calculate its decimal equivalent. The maximum value for 8 bits is 255.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-center">
+                    <div class="flex flex-col gap-4 p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <label for="binary-input" class="text-sm font-semibold text-gray-700">Binary Input (up to 8 bits):</label>
+                        <input type="text" id="binary-input" value="10101010" maxlength="8" class="p-2 border border-gray-300 rounded-md text-center font-mono text-2xl" placeholder="e.g., 10101010">
+                        <button onclick="convertToDecimal()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                            Convert to Decimal
+                        </button>
+                    </div>
+                    <div class="w-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700 mb-2">Decimal Value:</p>
+                        <p id="decimal-output" class="text-3xl font-extrabold text-red-600">170</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 12: PRIME NUMBER TESTER (Math) -->
+        <!-- ========================================================================================= -->
+        <div id="game-prime" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Prime Number Tester
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Number Theory</h3>
+                    <p class="text-gray-700 mb-4">A prime number is a natural number greater than 1 that has no positive divisors other than 1 and itself (e.g., 2, 3, 5, 7, 11...).</p>
+                    <p class="text-gray-700 mb-4">Numbers that are not prime are called composite (e.g., 4, 6, 8, 9, 10...). The number 1 is neither prime nor composite.</p>
+                    <p class="text-gray-700">Enter an integer to instantly check if it is prime. The algorithm checks for divisibility up to the square root of the number for efficiency.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-center">
+                    <div class="flex flex-col gap-4 p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <label for="prime-input" class="text-sm font-semibold text-gray-700">Integer to Test (>= 2):</label>
+                        <div class="flex items-center gap-4">
+                            <input type="number" id="prime-input" value="17" min="2" class="p-2 border border-gray-300 rounded-md text-center font-mono text-2xl flex-grow">
+                            <button onclick="checkPrime()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                                Test
+                            </button>
+                        </div>
+                    </div>
+                    <div class="w-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700 mb-2">Result:</p>
+                        <p id="prime-output" class="text-2xl font-extrabold text-green-primary">17 is a Prime Number.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 13: SIMPLE ELECTRIC CIRCUIT SIMULATOR (Engineering/Physics) -->
+        <!-- ========================================================================================= -->
+        <div id="game-circuit" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Simple Electric Circuit Simulator
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Ohm's Law</h3>
+                    <p class="text-gray-700 mb-4">A simple circuit consists of a power source (Voltage), a component that restricts current (Resistance), and the flow of charge (Current).</p>
+                    <p class="text-gray-700 mb-4">These three quantities are related by Ohm's Law: Voltage (V) = Current (I) * Resistance (R).</p>
+                    <div class="bg-white p-3 rounded-lg shadow-md mb-4 text-center text-lg font-bold text-gray-900">
+                        V = I * R
+                    </div>
+                    <p class="text-gray-700">Adjust the Voltage (V) and Resistance (R) to calculate the resulting Current (I) in the circuit, measured in Amperes.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-center">
+                    <div class="flex flex-col gap-4 p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <div class="flex items-center gap-2 justify-between">
+                            <label for="voltage-input" class="text-sm font-semibold text-gray-700">Voltage (V):</label>
+                            <input type="number" id="voltage-input" value="12" min="1" class="w-20 text-center">
+                        </div>
+                        <div class="flex items-center gap-2 justify-between">
+                            <label for="resistance-input" class="text-sm font-semibold text-gray-700">Resistance (R):</label>
+                            <input type="number" id="resistance-input" value="4" min="0.1" step="0.1" class="w-20 text-center">
+                        </div>
+                        <button onclick="calculateOhm()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                            Calculate Current (I)
+                        </button>
+                    </div>
+                    <div class="w-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700 mb-2">Calculated Current (I):</p>
+                        <p id="current-output" class="text-3xl font-extrabold text-red-600">3.0 Amperes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 14: pH LEVEL CALCULATOR (Chemistry) -->
+        <!-- ========================================================================================= -->
+        <div id="game-ph" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                pH Level Calculator
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Acids and Bases</h3>
+                    <p class="text-gray-700 mb-4">The pH scale measures the acidity or basicity of an aqueous solution. It ranges from 0 to 14. A pH of 7 is neutral (pure water), below 7 is acidic, and above 7 is basic (alkaline).</p>
+                    <p class="text-gray-700 mb-4">pH is defined as the negative logarithm (base 10) of the hydrogen ion concentration (in moles per liter, M): pH = -log([H+]).</p>
+                    <p class="text-gray-700">Enter the hydrogen ion concentration, and the calculator will determine the pH and classify the solution.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-center">
+                    <div class="flex flex-col gap-4 p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <label for="hplus-input" class="text-sm font-semibold text-gray-700">Hydrogen Ion Concentration [H+] (e.g., 0.001 M):</label>
+                        <input type="number" id="hplus-input" value="0.0001" step="0.00001" min="0.00000000000001" class="p-2 border border-gray-300 rounded-md text-center font-mono text-xl">
+                        <button onclick="calculatePh()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                            Calculate pH
+                        </button>
+                    </div>
+                    <div class="w-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700 mb-2">pH Result:</p>
+                        <p id="ph-output" class="text-3xl font-extrabold text-red-600">4.0 (Acidic)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 15: VECTOR ADDITION CALCULATOR (Math/Physics) -->
+        <!-- ========================================================================================= -->
+        <div id="game-vector" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Vector Addition Calculator
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Vector Mathematics</h3>
+                    <p class="text-gray-700 mb-4">A vector is a quantity that has both magnitude (size) and direction (e.g., velocity, force). Vectors in 2D space are represented by components (x, y).</p>
+                    <p class="text-gray-700 mb-4">Vector Addition involves adding the corresponding components: (V<sub>1x</sub> + V<sub>2x</sub>, V<sub>1y</sub> + V<sub>2y</sub>). The resulting vector is the Resultant Force.</p>
+                    <p class="text-gray-700">Enter the x and y components for two vectors (V<sub>1</sub> and V<sub>2</sub>). The calculator will find the components and the magnitude of the Resultant Vector (R).</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-center">
+                    <div class="flex flex-col gap-4 p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <div class="flex justify-between items-center"><span class="font-bold">Vector 1 (V<sub>1</sub>)</span> X: <input type="number" id="v1x" value="3" class="w-16 text-center"> Y: <input type="number" id="v1y" value="4" class="w-16 text-center"></div>
+                        <div class="flex justify-between items-center"><span class="font-bold">Vector 2 (V<sub>2</sub>)</span> X: <input type="number" id="v2x" value="-1" class="w-16 text-center"> Y: <input type="number" id="v2y" value="2" class="w-16 text-center"></div>
+                        <button onclick="addVectors()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                            Calculate Resultant
+                        </button>
+                    </div>
+                    <div class="w-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700 mb-2">Resultant Vector (R):</p>
+                        <p id="vector-r" class="text-xl font-mono text-red-600">R = (2, 6)</p>
+                        <p class="mt-2 text-lg font-semibold text-gray-700 mb-2">Magnitude (|R|):</p>
+                        <p id="vector-mag" class="text-xl font-mono text-red-600">6.32</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 17: STELLAR CLASSIFICATION (Science/Astronomy) -->
+        <!-- ========================================================================================= -->
+        <div id="game-star" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Stellar Classification
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Hertzsprung-Russell (H-R) Diagram</h3>
+                    <p class="text-gray-700 mb-4">Stars are classified by their temperature (color) and luminosity (brightness/absolute magnitude). This system is summarized in the H-R Diagram.</p>
+                    <p class="text-gray-700 mb-4">The spectral classes, from hottest to coldest, are O, B, A, F, G, K, M. Our Sun is a G-type star.</p>
+                    <p class="text-gray-700">Select the temperature (color) and brightness of a star to determine its class and what stage of life it is currently in (e.g., Main Sequence, Red Giant, White Dwarf).</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-center">
+                    <div class="flex flex-col gap-4 p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <div class="flex justify-between items-center">
+                            <label for="star-temp" class="text-sm font-semibold text-gray-700">Temperature (Color):</label>
+                            <select id="star-temp" onchange="classifyStar()" class="w-32">
+                                <option value="O">O (Blue, >25k K)</option>
+                                <option value="G" selected>G (Yellow, 5k-6k K)</option>
+                                <option value="M">M (Red, <3.5k K)</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label for="star-lum" class="text-sm font-semibold text-gray-700">Luminosity (Magnitude):</label>
+                            <select id="star-lum" onchange="classifyStar()" class="w-32">
+                                <option value="High">High</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="Low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="w-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700 mb-2">Classification:</p>
+                        <p id="star-output" class="text-2xl font-extrabold text-green-primary">G2V (Main Sequence)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 18: VOLUME CALCULATOR (Math) -->
+        <!-- ========================================================================================= -->
+        <div id="game-volume" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Volume Calculator
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">3D Geometry</h3>
+                    <p class="text-gray-700 mb-4">Volume is the amount of three-dimensional space occupied by an object. Calculating volume depends on the object's shape.</p>
+                    <p class="text-gray-700 mb-4">For a Cube/Rectangular Prism, Volume = length x width x height. For a Sphere, Volume = 4/3  &pi; r<sup>3</sup>.</p>
+                    <p class="text-gray-700">Select a 3D shape and enter the required dimensions (length, radius, etc.) to calculate its volume. All inputs are assumed to be in the same unit (e.g., cm).</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-center">
+                    <div class="flex flex-col gap-4 p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <label for="volume-shape" class="text-sm font-semibold text-gray-700">Select Shape:</label>
+                        <select id="volume-shape" onchange="updateVolumeInputs()" class="p-2">
+                            <option value="cube">Cube (Length, Width, Height)</option>
+                            <option value="sphere">Sphere (Radius)</option>
+                        </select>
+
+                        <div id="volume-inputs" class="flex flex-wrap gap-2 justify-between">
+                            <input type="number" id="vol-dim1" placeholder="Length" value="5" class="w-20 text-center">
+                            <input type="number" id="vol-dim2" placeholder="Width" value="5" class="w-20 text-center">
+                            <input type="number" id="vol-dim3" placeholder="Height" value="5" class="w-20 text-center">
+                        </div>
+
+                        <button onclick="calculateVolume()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                            Calculate Volume
+                        </button>
+                    </div>
+                    <div class="w-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700 mb-2">Calculated Volume (units³):</p>
+                        <p id="volume-output" class="text-3xl font-extrabold text-red-600">125.00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 19: SIMPLE INVENTORY/STACK MANAGEMENT (CS) -->
+        <!-- ========================================================================================= -->
+        <div id="game-stack" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Simple Inventory (Stack)
+            </h2>
+
+            <div class="game-grid">
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Data Structures (LIFO)</h3>
+                    <p class="text-gray-700 mb-4">A Stack is a fundamental data structure that operates on the LIFO (Last-In, First-Out) principle, like a stack of plates. The last item added is the first item to be removed.</p>
+                    <p class="text-gray-700 mb-4">Key operations are Push (add an item to the top) and Pop (remove the top item).</p>
+                    <p class="text-gray-700">Use this simulator to manage a stack of items. Push items onto the stack and see how the Pop operation always retrieves the most recently added item.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col justify-center">
+                    <div class="flex flex-col gap-4 p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <label for="stack-input" class="text-sm font-semibold text-gray-700">Item to Push:</label>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="stack-input" value="Mug" class="p-2 border border-gray-300 rounded-md flex-grow">
+                            <button onclick="pushStack()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                                PUSH
+                            </button>
+                            <button onclick="popStack()" class="btn-action px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                                POP
+                            </button>
+                        </div>
+                    </div>
+                    <div class="w-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700 mb-2">Current Stack (Top to Bottom):</p>
+                        <div id="stack-display" class="min-h-24 bg-white p-2 border border-gray-300 rounded-md flex flex-col-reverse gap-1 items-center justify-start">
+                            <span class="p-1 w-full text-center bg-gray-200 rounded text-sm">Plate 3</span>
+                            <span class="p-1 w-full text-center bg-gray-200 rounded text-sm">Plate 2</span>
+                            <span class="p-1 w-full text-center bg-gray-200 rounded text-sm">Plate 1</span>
+                        </div>
+                        <p id="stack-message" class="text-center mt-2 text-sm text-gray-600">Stack size: 3</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================================================= -->
+        <!-- GAME 20: FIBONACCI SEQUENCE CALCULATOR (Math/Computer Science) - ORIGINAL 4 MOVED TO 20 -->
+        <!-- ========================================================================================= -->
+        <div id="game-fibonacci" class="game-card">
+            <h2 class="text-3xl font-extrabold text-green-primary border-b-2 border-green-secondary pb-3 mb-6">
+                Fibonacci Sequence Calculator
+            </h2>
+
+            <div class="game-grid">
+                
+                <div class="column-info info-panel flex-1 p-4 bg-green-light rounded-lg border border-green-secondary/50 shadow-inner">
+                    <h3 class="text-xl font-bold text-green-primary mb-3 border-b border-green-primary/50 pb-2">Sequence and Growth Rate</h3>
+                    
+                    <p class="text-gray-700 mb-4">The Fibonacci sequence, denoted Fn, is an infinite series of numbers where each number after the first two is the sum of the two preceding ones. The sequence starts with F0 = 0 and F1 = 1.</p>
+                    
+                    <div class="bg-white p-3 rounded-lg shadow-md mb-4 text-center text-lg font-bold text-gray-900">
+                        Fn = F(n-1) + F(n-2)
+                    </div>
+                    
+                    <p class="text-gray-700 mb-4">The ratio of consecutive Fibonacci numbers converges to the Golden Ratio (approximately 1.618). This ratio is prevalent in nature, art, and architecture.</p>
+                </div>
+                
+                <div class="column-controls flex-1 p-4 bg-white rounded-lg border border-gray-300 shadow-lg flex flex-col items-center">
+                    
+                    <div class="controls flex gap-4 items-center justify-center p-3 bg-gray-100 rounded-lg shadow-inner w-full mb-4">
+                        <label for="fib-index" class="text-sm font-semibold text-gray-700">Calculate Index (N):</label>
+                        <input type="number" id="fib-index" min="0" max="40" value="10" class="w-20 p-2 border border-gray-300 rounded-md text-center">
+                        <button onclick="calculateFibonacci()" class="btn-action px-4 py-2 bg-green-primary text-white rounded-lg hover:bg-green-secondary">
+                            Calculate
+                        </button>
+                    </div>
+
+                    <div class="w-full mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="text-lg font-semibold text-gray-700 mb-2">Result FN:</p>
+                        <p id="fib-result" class="text-3xl font-extrabold text-red-600">55</p>
+                        <p class="mt-4 text-sm font-semibold text-gray-700 mb-1">Sequence (up to N=10):</p>
+                        <p id="fib-sequence" class="text-sm font-mono text-gray-600 break-all">0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // =========================================================================================
+        // SCRIPTS 1-20: GAME LOGIC
+        // =========================================================================================
+
+        // --- GLOBAL UTILITIES (for multiple games) ---
+        function getCanvasContext(id) {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext('2d');
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            // Set internal canvas resolution to match display size for crisp drawing
+            canvas.width = width;
+            canvas.height = height;
+            return { ctx, width, height, canvas };
+        }
+        
+        // --- GAME 1: LINEAR REGRESSION ---
+        (function() {
+            const DATA_POINTS = [
+                {x: 1, y: 1.5}, {x: 2, y: 2.2}, {x: 3, y: 3.8}, {x: 4, y: 4.1}, 
+                {x: 5, y: 5.5}, {x: 6, y: 6.0}, {x: 7, y: 7.9}, {x: 8, y: 8.1}
+            ];
+            const MAX_X = 10;
+            const MAX_Y = 10;
+
+            function toCanvasX(x, width) { return (x / MAX_X) * width; }
+            function toCanvasY(y, height) { return height - (y / MAX_Y) * height; }
+
+            window.updateRegressionPlot = function() {
+                const { ctx, width, height } = getCanvasContext('regressionCanvas');
+                const messageEl = document.getElementById('regressionMessage');
+
+                const m = parseFloat(document.getElementById('slope').value) || 0;
+                const b = parseFloat(document.getElementById('intercept').value) || 0;
+                
+                let sse = 0; 
+                ctx.clearRect(0, 0, width, height);
+
+                // 1. Draw Data Points
+                ctx.fillStyle = '#27ae60';
+                DATA_POINTS.forEach(p => {
+                    const cx = toCanvasX(p.x, width);
+                    const cy = toCanvasY(p.y, height);
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Calculate Error for SSE
+                    const predictedY = m * p.x + b;
+                    sse += Math.pow(p.y - predictedY, 2);
+                });
+
+                // 2. Draw Regression Line (y = mx + b)
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                let yStart = m * 0 + b;
+                ctx.moveTo(toCanvasX(0, width), toCanvasY(yStart, height));
+                let yEnd = m * MAX_X + b;
+                ctx.lineTo(toCanvasX(MAX_X, width), toCanvasY(yEnd, height));
+                ctx.stroke();
+
+                const roundedSSE = sse.toFixed(2);
+                messageEl.textContent = `Current Model: y = ${m.toFixed(1)}x + ${b.toFixed(1)}. Sum of Squared Errors (SSE): ${roundedSSE}`;
+                messageEl.className = 'text-center mt-4 p-2 bg-blue-100 text-blue-700 font-semibold rounded-lg';
+            }
+
+            window.addEventListener('load', window.updateRegressionPlot);
+            window.addEventListener('resize', window.updateRegressionPlot);
+        })();
+
+        // --- GAME 2: QUADRATIC FUNCTION EXPLORER ---
+        (function() {
+            window.drawQuadratic = function() {
+                const { ctx, width, height } = getCanvasContext('quadraticCanvas');
+                const messageEl = document.getElementById('quadraticMessage');
+                
+                const a = parseFloat(document.getElementById('qa').value);
+                const b = parseFloat(document.getElementById('qb').value);
+                const c = parseFloat(document.getElementById('qc').value);
+
+                document.getElementById('qa-val').textContent = a.toFixed(1);
+                document.getElementById('qb-val').textContent = b.toFixed(1);
+                document.getElementById('qc-val').textContent = c.toFixed(1);
+                
+                ctx.clearRect(0, 0, width, height);
+
+                // Draw Axes (Center is x=0, y=0)
+                const originX = width / 2;
+                const originY = height / 2;
+                const scale = width / 10; 
+                
+                ctx.strokeStyle = '#999';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, originY); ctx.lineTo(width, originY); // X-axis
+                ctx.moveTo(originX, 0); ctx.lineTo(originX, height); // Y-axis
+                ctx.stroke();
+
+                // Draw Quadratic Curve
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+
+                let first = true;
+                let roots = [];
+                for (let px = 0; px <= width; px++) {
+                    const x = (px - originX) / scale;
+                    const y = a * x * x + b * x + c;
+                    const py = originY - y * scale;
+
+                    if (first) {
+                        ctx.moveTo(px, py);
+                        first = false;
+                    } else {
+                        ctx.lineTo(px, py);
+                    }
+
+                    // Simple root finding (when y crosses 0)
+                    if (py >= originY - 1 && py <= originY + 1 && x > -5 && x < 5) {
+                        if (roots.length === 0 || Math.abs(x - roots[roots.length - 1]) > 0.1) {
+                            roots.push(x);
+                        }
+                    }
+                }
+                ctx.stroke();
+
+                // Calculate Vertex
+                let vx = (a === 0) ? 0 : -b / (2 * a);
+                let vy = a * vx * vx + b * vx + c;
+                
+                const vpx = originX + vx * scale;
+                const vpy = originY - vy * scale;
+
+                // Draw Vertex marker
+                ctx.fillStyle = '#2ecc71';
+                ctx.beginPath();
+                ctx.arc(vpx, vpy, 4, 0, 2 * Math.PI);
+                ctx.fill();
+
+                // Update Message
+                const rootText = (roots.length > 0) 
+                    ? `Roots: ${roots[0].toFixed(2)}${roots.length > 1 ? ', ' + roots[1].toFixed(2) : ''}`
+                    : 'No Real Roots';
+                
+                messageEl.textContent = `Vertex: (${vx.toFixed(2)}, ${vy.toFixed(2)}). ${rootText}.`;
+                messageEl.className = 'text-center mt-4 p-2 bg-blue-100 text-blue-700 font-semibold rounded-lg';
+            }
+
+            window.addEventListener('load', window.drawQuadratic);
+            window.addEventListener('resize', window.drawQuadratic);
+        })();
+
+        // --- GAME 3: HEAT TRANSFER SIMULATOR ---
+        (function() {
+            let temp1 = 80;
+            let temp2 = 20;
+            let animationFrameId;
+
+            function drawHeatSim(ctx, width, height) {
+                const color1 = `rgb(${255}, ${255 - temp1 * 2.5}, ${255 - temp1 * 2.5})`;
+                const color2 = `rgb(${255 - temp2 * 2.5}, ${255 - temp2 * 2.5}, ${255})`;
+                
+                ctx.clearRect(0, 0, width, height);
+
+                const blockWidth = width / 2;
+                const blockHeight = height * 0.8;
+                const yPos = (height - blockHeight) / 2;
+
+                // Block 1 (Hot)
+                ctx.fillStyle = color1;
+                ctx.fillRect(0, yPos, blockWidth, blockHeight);
+                ctx.strokeStyle = '#e74c3c';
+                ctx.strokeRect(0, yPos, blockWidth, blockHeight);
+
+                // Block 2 (Cold)
+                ctx.fillStyle = color2;
+                ctx.fillRect(blockWidth, yPos, blockWidth, blockHeight);
+                ctx.strokeStyle = '#3498db';
+                ctx.strokeRect(blockWidth, yPos, blockWidth, blockHeight);
+                
+                // Temps
+                ctx.fillStyle = '#2c3e50';
+                ctx.font = '20px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${temp1.toFixed(1)}°C`, blockWidth / 2, height / 2);
+                ctx.fillText(`${temp2.toFixed(1)}°C`, blockWidth * 1.5, height / 2);
+
+                document.getElementById('heatMessage').textContent = `Block 1 Temp: ${temp1.toFixed(1)}°C | Block 2 Temp: ${temp2.toFixed(1)}°C`;
+            }
+
+            function animateHeatSim() {
+                const { ctx, width, height } = getCanvasContext('heatCanvas');
+                const K = parseFloat(document.getElementById('conductivity').value);
+                const dt = 0.05; 
+                
+                // Conduction model (simple proportional heat transfer)
+                const dT = K * (temp1 - temp2) * dt;
+                
+                if (Math.abs(temp1 - temp2) > 0.1) {
+                    temp1 -= dT;
+                    temp2 += dT;
+                    drawHeatSim(ctx, width, height);
+                    animationFrameId = requestAnimationFrame(animateHeatSim);
+                } else {
+                    document.getElementById('heatMessage').textContent = `Equilibrium Reached at ${temp1.toFixed(1)}°C!`;
+                }
+            }
+
+            window.resetHeatSim = function() {
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                temp1 = 80;
+                temp2 = 20;
+                const { ctx, width, height } = getCanvasContext('heatCanvas');
+                drawHeatSim(ctx, width, height);
+            }
+            window.startHeatSim = function() {
+                resetHeatSim();
+                animateHeatSim();
+            }
+
+            window.addEventListener('load', window.resetHeatSim);
+            window.addEventListener('resize', window.resetHeatSim);
+        })();
+
+        // --- GAME 4: DNA COMPLEMENT GENERATOR ---
+        (function() {
+            window.generateComplement = function() {
+                const input = document.getElementById('dna-input').value.toUpperCase().trim();
+                const outputEl = document.getElementById('dna-output');
+                
+                // Input validation (A, T, G, C only)
+                if (!/^[ATGC]+$/.test(input)) {
+                    outputEl.textContent = 'Invalid sequence. Use A, T, G, C only.';
+                    outputEl.className = 'text-xl font-mono text-gray-500 break-all';
+                    return;
+                }
+
+                let complement = '';
+                for (let i = 0; i < input.length; i++) {
+                    const base = input[i];
+                    switch (base) {
+                        case 'A': complement += 'T'; break;
+                        case 'T': complement += 'A'; break;
+                        case 'G': complement += 'C'; break;
+                        case 'C': complement += 'G'; break;
+                    }
+                }
+                outputEl.textContent = complement;
+                outputEl.className = 'text-xl font-mono text-red-600 break-all';
+            }
+
+            window.addEventListener('load', window.generateComplement);
+        })();
+
+        // --- GAME 5: ARRAY SORTING CHALLENGE (Bubble Sort) ---
+        (function() {
+            let array = [];
+            let i = 0; // Current pass index
+            let j = 0; // Current comparison index
+            let isSorted = false;
+
+            function drawArray(ctx, width, height) {
+                ctx.clearRect(0, 0, width, height);
+                const barWidth = width / array.length;
+                const maxVal = 50; 
+                
+                for (let k = 0; k < array.length; k++) {
+                    const barHeight = (array[k] / maxVal) * height * 0.9;
+                    const x = k * barWidth;
+                    const y = height - barHeight;
+
+                    // Color current comparison elements
+                    if (!isSorted && k === j) {
+                        ctx.fillStyle = '#e74c3c'; // Red for the comparison element
+                    } else if (!isSorted && k === j + 1) {
+                        ctx.fillStyle = '#f39c12'; // Orange for the next element
+                    } else if (isSorted || k < i) {
+                         ctx.fillStyle = '#2ecc71'; // Green for sorted (or passed)
+                    } else {
+                        ctx.fillStyle = '#3498db'; // Blue for unsorted
+                    }
+                    
+                    ctx.fillRect(x, y, barWidth - 2, barHeight);
+                    
+                    // Draw number on the bar
+                    ctx.fillStyle = 'black';
+                    ctx.font = '12px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(array[k], x + barWidth / 2, y - 5);
+                }
+            }
+
+            window.resetArray = function() {
+                const { ctx, width, height } = getCanvasContext('sortCanvas');
+                array = Array.from({ length: 15 }, () => Math.floor(Math.random() * 45) + 5);
+                i = 0;
+                j = 0;
+                isSorted = false;
+                document.getElementById('sortMessage').textContent = 'New array loaded. Start sorting!';
+                drawArray(ctx, width, height);
+            }
+
+            window.sortStep = function() {
+                const { ctx, width, height } = getCanvasContext('sortCanvas');
+                
+                if (isSorted || array.length <= 1) {
+                    document.getElementById('sortMessage').textContent = 'The array is completely sorted!';
+                    drawArray(ctx, width, height);
+                    return;
+                }
+
+                if (i < array.length - 1) {
+                    if (j < array.length - 1 - i) {
+                        if (array[j] > array[j + 1]) {
+                            // Swap
+                            [array[j], array[j + 1]] = [array[j + 1], array[j]];
+                            document.getElementById('sortMessage').textContent = `Swapped ${array[j+1]} and ${array[j]} at indices ${j} and ${j+1}.`;
+                        } else {
+                            document.getElementById('sortMessage').textContent = `No swap needed at indices ${j} and ${j+1}.`;
+                        }
+                        j++;
+                    } else {
+                        // End of a pass
+                        i++;
+                        j = 0;
+                        document.getElementById('sortMessage').textContent = `Pass ${i} complete. Next pass starts.`;
+                    }
+                } else {
+                    isSorted = true;
+                    document.getElementById('sortMessage').textContent = 'The array is completely sorted!';
+                }
+                drawArray(ctx, width, height);
+            }
+
+            window.addEventListener('load', window.resetArray);
+            window.addEventListener('resize', window.resetArray);
+        })();
+
+        // --- GAME 6: CENTER OF GRAVITY FINDER ---
+        (function() {
+            let masses = [];
+
+            function drawCogSim(ctx, width, height) {
+                ctx.clearRect(0, 0, width, height);
+                let totalMass = 0;
+                let sumMX = 0;
+                let sumMY = 0;
+                
+                // Draw Masses
+                masses.forEach(m => {
+                    ctx.fillStyle = 'black';
+                    ctx.beginPath();
+                    ctx.arc(m.x, m.y, 5, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    totalMass += m.mass;
+                    sumMX += m.x * m.mass;
+                    sumMY += m.y * m.mass;
+                });
+                
+                // Calculate CoG
+                let cogX = 0;
+                let cogY = 0;
+                if (totalMass > 0) {
+                    cogX = sumMX / totalMass;
+                    cogY = sumMY / totalMass;
+                }
+
+                // Draw CoG (Red Cross)
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(cogX - 10, cogY);
+                ctx.lineTo(cogX + 10, cogY);
+                ctx.moveTo(cogX, cogY - 10);
+                ctx.lineTo(cogX, cogY + 10);
+                ctx.stroke();
+
+                document.getElementById('cogMessage').textContent = `CoG: (X: ${cogX.toFixed(0)}, Y: ${cogY.toFixed(0)}). Total Masses: ${masses.length}`;
+            }
+
+            window.addMass = function(event) {
+                const { ctx, width, height, canvas } = getCanvasContext('cogCanvas');
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+
+                // Simple fixed mass for all clicks
+                masses.push({ x: x, y: y, mass: 1 });
+                drawCogSim(ctx, width, height);
+            }
+
+            window.resetCogSim = function() {
+                masses = [];
+                const { ctx, width, height } = getCanvasContext('cogCanvas');
+                drawCogSim(ctx, width, height);
+            }
+
+            window.addEventListener('load', window.resetCogSim);
+            window.addEventListener('resize', window.resetCogSim);
+        })();
+
+        // --- GAME 7: COLOR THEORY MIXER ---
+        (function() {
+            window.updateColorMixer = function() {
+                const r = parseInt(document.getElementById('colorR').value);
+                const g = parseInt(document.getElementById('colorG').value);
+                const b = parseInt(document.getElementById('colorB').value);
+                
+                document.getElementById('colorR-val').textContent = r;
+                document.getElementById('colorG-val').textContent = g;
+                document.getElementById('colorB-val').textContent = b;
+
+                const colorString = `rgb(${r}, ${g}, ${b})`;
+                const hexString = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase()}`;
+                
+                const displayEl = document.getElementById('colorDisplay');
+                displayEl.style.backgroundColor = colorString;
+                displayEl.textContent = `RGB(${r}, ${g}, ${b}) / ${hexString}`;
+            }
+            window.addEventListener('load', window.updateColorMixer);
+        })();
+
+        // --- GAME 8: CAESAR CIPHER ENCRYPTION ---
+        (function() {
+            window.applyCipher = function() {
+                const text = document.getElementById('cipher-text').value.toUpperCase();
+                const shift = parseInt(document.getElementById('cipher-shift').value) % 26;
+                let result = '';
+
+                for (let i = 0; i < text.length; i++) {
+                    let charCode = text.charCodeAt(i);
+                    
+                    // Check if it's an uppercase letter (A=65, Z=90)
+                    if (charCode >= 65 && charCode <= 90) {
+                        // Apply shift and wrap using modular arithmetic
+                        charCode = charCode + shift;
+                        if (charCode > 90) {
+                            charCode -= 26;
+                        }
+                        result += String.fromCharCode(charCode);
+                    } else {
+                        // Keep non-alphabetic characters (like space) as they are
+                        result += text[i];
+                    }
+                }
+                document.getElementById('cipher-output').textContent = result;
+            }
+            window.addEventListener('load', window.applyCipher);
+        })();
+
+        // --- GAME 9: UNIT CONVERSION CHALLENGE ---
+        (function() {
+            const conversionFactors = {
+                'km_m': 1000, 'm_km': 0.001,
+                'km_mi': 0.621371, 'mi_km': 1.60934,
+                'kg_lb': 2.20462, 'lb_kg': 0.453592,
+            };
+
+            window.convertUnit = function() {
+                const value = parseFloat(document.getElementById('unit-value').value);
+                const fromUnit = document.getElementById('unit-from').value;
+                const toUnit = document.getElementById('unit-to').value;
+                const outputEl = document.getElementById('unit-output');
+
+                if (isNaN(value)) {
+                    outputEl.textContent = 'Enter a valid number.';
+                    return;
+                }
+
+                let result;
+                const key = `${fromUnit}_${toUnit}`;
+
+                if (fromUnit === toUnit) {
+                    result = value;
+                } else if (conversionFactors[key]) {
+                    result = value * conversionFactors[key];
+                } else {
+                    // Fallback for missing or unsupported conversions
+                    outputEl.textContent = 'Unsupported conversion.';
+                    return;
+                }
+
+                outputEl.textContent = `${result.toFixed(2)} ${toUnit}`;
+            }
+            window.addEventListener('load', window.convertUnit);
+        })();
+
+        // --- GAME 10: SIMPLE HARMONIC MOTION SIMULATOR ---
+        (function() {
+            let lastTime = 0;
+            let time = 0;
+            let animationId;
+
+            function updateShm(resetTime = false) {
+                if (animationId) cancelAnimationFrame(animationId);
+                if (resetTime) time = 0;
+                
+                const mass = parseFloat(document.getElementById('shm-mass').value);
+                const k = parseFloat(document.getElementById('shm-k').value);
+                
+                const period = 2 * Math.PI * Math.sqrt(mass / k);
+                const frequency = 1 / period;
+
+                document.getElementById('shmMessage').textContent = `Period: ${period.toFixed(2)} s. Frequency: ${frequency.toFixed(2)} Hz.`;
+                document.getElementById('shm-mass-val') ? document.getElementById('shm-mass-val').textContent = mass : null;
+                document.getElementById('shm-k-val') ? document.getElementById('shm-k-val').textContent = k : null;
+                
+                animateShm(0); 
+            }
+
+            function animateShm(timestamp) {
+                const { ctx, width, height } = getCanvasContext('shmCanvas');
+                
+                if (lastTime === 0) lastTime = timestamp;
+                const deltaTime = (timestamp - lastTime) / 1000;
+                lastTime = timestamp;
+                time += deltaTime;
+
+                const mass = parseFloat(document.getElementById('shm-mass').value);
+                const k = parseFloat(document.getElementById('shm-k').value);
+                const amplitude = (height / 2) * 0.8;
+                const omega = Math.sqrt(k / mass); // Angular frequency
+
+                ctx.clearRect(0, 0, width, height);
+
+                // Draw Equilibrium Line
+                ctx.strokeStyle = '#27ae60';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, height / 2);
+                ctx.lineTo(width, height / 2);
+                ctx.stroke();
+
+                // Calculate current displacement (x = A * cos(omega * t))
+                const displacement = amplitude * Math.cos(omega * time);
+                const cy = height / 2 - displacement;
+
+                // Draw Spring (simplified)
+                ctx.strokeStyle = '#3498db';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(width / 2, 0);
+                ctx.lineTo(width / 2, cy - 20);
+                ctx.stroke();
+
+                // Draw Mass
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.arc(width / 2, cy, 15, 0, 2 * Math.PI);
+                ctx.fill();
+
+                animationId = requestAnimationFrame(animateShm);
+            }
+
+            window.updateShm = updateShm;
+            window.addEventListener('load', () => updateShm(true));
+            window.addEventListener('resize', () => updateShm(false));
+        })();
+
+
+        // --- GAME 11: BINARY TO DECIMAL CONVERTER ---
+        (function() {
+            window.convertToDecimal = function() {
+                const binary = document.getElementById('binary-input').value.trim();
+                const outputEl = document.getElementById('decimal-output');
+                
+                if (!/^[01]+$/.test(binary)) {
+                    outputEl.textContent = 'Invalid Binary';
+                    outputEl.className = 'text-3xl font-extrabold text-gray-500';
+                    return;
+                }
+
+                const decimal = parseInt(binary, 2);
+                outputEl.textContent = decimal.toLocaleString();
+                outputEl.className = 'text-3xl font-extrabold text-red-600';
+            }
+            window.addEventListener('load', window.convertToDecimal);
+        })();
+
+        // --- GAME 12: PRIME NUMBER TESTER ---
+        (function() {
+            function isPrime(num) {
+                if (num <= 1) return false;
+                if (num <= 3) return true;
+                if (num % 2 === 0 || num % 3 === 0) return false;
+                
+                // Check up to sqrt(num)
+                for (let i = 5; i * i <= num; i = i + 6) {
+                    if (num % i === 0 || num % (i + 2) === 0) return false;
+                }
+                return true;
+            }
+
+            window.checkPrime = function() {
+                const num = parseInt(document.getElementById('prime-input').value);
+                const outputEl = document.getElementById('prime-output');
+                
+                if (isNaN(num) || num < 2) {
+                    outputEl.textContent = 'Please enter an integer greater than 1.';
+                    outputEl.className = 'text-2xl font-extrabold text-gray-500';
+                    return;
+                }
+
+                if (isPrime(num)) {
+                    outputEl.textContent = `${num} is a Prime Number.`;
+                    outputEl.className = 'text-2xl font-extrabold text-green-primary';
+                } else {
+                    outputEl.textContent = `${num} is a Composite Number.`;
+                    outputEl.className = 'text-2xl font-extrabold text-red-600';
+                }
+            }
+            window.addEventListener('load', window.checkPrime);
+        })();
+
+        // --- GAME 13: SIMPLE ELECTRIC CIRCUIT SIMULATOR ---
+        (function() {
+            window.calculateOhm = function() {
+                const V = parseFloat(document.getElementById('voltage-input').value);
+                const R = parseFloat(document.getElementById('resistance-input').value);
+                const outputEl = document.getElementById('current-output');
+
+                if (isNaN(V) || isNaN(R) || R <= 0) {
+                    outputEl.textContent = 'Invalid Input';
+                    outputEl.className = 'text-3xl font-extrabold text-gray-500';
+                    return;
+                }
+                
+                const I = V / R; // I = V / R
+                outputEl.textContent = `${I.toFixed(2)} Amperes`;
+                outputEl.className = 'text-3xl font-extrabold text-red-600';
+            }
+            window.addEventListener('load', window.calculateOhm);
+        })();
+
+        // --- GAME 14: pH LEVEL CALCULATOR ---
+        (function() {
+            window.calculatePh = function() {
+                const hPlus = parseFloat(document.getElementById('hplus-input').value);
+                const outputEl = document.getElementById('ph-output');
+
+                if (isNaN(hPlus) || hPlus <= 0) {
+                    outputEl.textContent = 'Invalid Concentration';
+                    outputEl.className = 'text-3xl font-extrabold text-gray-500';
+                    return;
+                }
+
+                const pH = -Math.log10(hPlus);
+                let classification;
+                let color = 'text-yellow-500';
+
+                if (pH < 7) {
+                    classification = 'Acidic';
+                    color = 'text-red-600';
+                } else if (pH > 7) {
+                    classification = 'Basic (Alkaline)';
+                    color = 'text-blue-600';
+                } else {
+                    classification = 'Neutral';
+                    color = 'text-green-primary';
+                }
+                
+                outputEl.textContent = `${pH.toFixed(1)} (${classification})`;
+                outputEl.className = `text-3xl font-extrabold ${color}`;
+            }
+            window.addEventListener('load', window.calculatePh);
+        })();
+
+        // --- GAME 15: VECTOR ADDITION CALCULATOR ---
+        (function() {
+            window.addVectors = function() {
+                const v1x = parseFloat(document.getElementById('v1x').value);
+                const v1y = parseFloat(document.getElementById('v1y').value);
+                const v2x = parseFloat(document.getElementById('v2x').value);
+                const v2y = parseFloat(document.getElementById('v2y').value);
+                const rEl = document.getElementById('vector-r');
+                const magEl = document.getElementById('vector-mag');
+
+                if ([v1x, v1y, v2x, v2y].some(isNaN)) {
+                    rEl.textContent = 'R = (Invalid Input, Invalid Input)';
+                    magEl.textContent = 'Invalid Magnitude';
+                    return;
+                }
+
+                const rx = v1x + v2x;
+                const ry = v1y + v2y;
+                const magnitude = Math.sqrt(rx * rx + ry * ry);
+                
+                rEl.textContent = `R = (${rx.toFixed(2)}, ${ry.toFixed(2)})`;
+                magEl.textContent = magnitude.toFixed(2);
+            }
+            window.addEventListener('load', window.addVectors);
+        })();
+
+        // --- GAME 16: SIMPLE RAY TRACER (2D) ---
+        (function() {
+            // Scene elements (simplified)
+            const lightSource = { x: 50, y: 50 };
+            const obstacles = [
+                { x: 150, y: 150, r: 30 },
+                { x: 250, y: 100, r: 20 },
+                { x: 350, y: 200, r: 40 },
+            ];
+
+            function isVisible(p1, p2, obstacles) {
+                // Check if the line segment (p1 -> p2) intersects any obstacle
+                for (const obs of obstacles) {
+                    const dx = p2.x - p1.x;
+                    const dy = p2.y - p1.y;
+                    const a = dx * dx + dy * dy;
+                    const b = 2 * (dx * (p1.x - obs.x) + dy * (p1.y - obs.y));
+                    const c = (p1.x - obs.x) * (p1.x - obs.x) + (p1.y - obs.y) * (p1.y - obs.y) - obs.r * obs.r;
+                    
+                    let discriminant = b * b - 4 * a * c;
+
+                    if (discriminant >= 0) {
+                        // Check if the intersection point is on the segment (0 < t < 1)
+                        const t1 = (-b - Math.sqrt(discriminant)) / (2 * a);
+                        const t2 = (-b + Math.sqrt(discriminant)) / (2 * a);
+                        
+                        // Intersection occurs if the ray starts inside the circle or intersects the segment
+                        if ((t1 > 0.01 && t1 < 1) || (t2 > 0.01 && t2 < 1)) {
+                            return false; // Ray is blocked
+                        }
+                    }
+                }
+                return true; // Ray is not blocked
+            }
+
+            window.renderRayTrace = function() {
+                const { ctx, width, height } = getCanvasContext('rayCanvas');
+                const resolution = 5; // Pixels per check
+
+                // 1. Draw Background (Ambient Light)
+                ctx.fillStyle = '#fefefe';
+                ctx.fillRect(0, 0, width, height);
+
+                // 2. Ray Trace
+                for (let x = 0; x < width; x += resolution) {
+                    for (let y = 0; y < height; y += resolution) {
+                        const pixelCenter = { x: x + resolution / 2, y: y + resolution / 2 };
+                        
+                        if (isVisible(lightSource, pixelCenter, obstacles)) {
+                            // Illuminated
+                            ctx.fillStyle = '#fffaaf'; // Light Yellow
+                        } else {
+                            // Shadowed
+                            ctx.fillStyle = '#aaa'; // Grey (Shadow)
+                        }
+                        ctx.fillRect(x, y, resolution, resolution);
+                    }
+                }
+
+                // 3. Draw Obstacles
+                ctx.fillStyle = '#34495e'; // Dark Grey
+                obstacles.forEach(obs => {
+                    ctx.beginPath();
+                    ctx.arc(obs.x, obs.y, obs.r, 0, 2 * Math.PI);
+                    ctx.fill();
+                });
+
+                // 4. Draw Light Source
+                ctx.fillStyle = '#e74c3c'; // Red
+                ctx.beginPath();
+                ctx.arc(lightSource.x, lightSource.y, 10, 0, 2 * Math.PI);
+                ctx.fill();
+
+                document.getElementById('rayMessage').textContent = 'Rendered: Yellow is Illuminated, Gray is Shadow.';
+            }
+
+            window.addEventListener('load', window.renderRayTrace);
+            window.addEventListener('resize', window.renderRayTrace);
+        })();
+
+        // --- GAME 17: STELLAR CLASSIFICATION ---
+        (function() {
+            window.classifyStar = function() {
+                const temp = document.getElementById('star-temp').value;
+                const lum = document.getElementById('star-lum').value;
+                const outputEl = document.getElementById('star-output');
+
+                let classification = '';
+                let color = 'text-gray-700';
+
+                // Simplified H-R Diagram Logic
+                if (temp === 'O' && lum === 'High') {
+                    classification = 'O Type (Main Sequence/Giant)';
+                    color = 'text-blue-500';
+                } else if (temp === 'G' && lum === 'Medium') {
+                    classification = 'G Type (Main Sequence - Like the Sun)';
+                    color = 'text-yellow-600';
+                } else if (temp === 'M' && lum === 'Medium') {
+                    classification = 'M Type (Main Sequence)';
+                    color = 'text-red-600';
+                } else if (temp === 'O' && lum === 'Low') {
+                    classification = 'White Dwarf (Hot but Dim)';
+                    color = 'text-blue-300';
+                } else if (temp === 'M' && lum === 'High') {
+                    classification = 'Red Giant/Supergiant (Cool but Bright)';
+                    color = 'text-orange-500';
+                } else {
+                    classification = 'Main Sequence or other stage.';
+                    color = 'text-green-primary';
+                }
+
+                outputEl.textContent = classification;
+                outputEl.className = `text-2xl font-extrabold ${color}`;
+            }
+            window.addEventListener('load', window.classifyStar);
+        })();
+
+        // --- GAME 18: VOLUME CALCULATOR ---
+        (function() {
+            window.updateVolumeInputs = function() {
+                const shape = document.getElementById('volume-shape').value;
+                const inputsDiv = document.getElementById('volume-inputs');
+                inputsDiv.innerHTML = '';
+
+                if (shape === 'cube') {
+                    inputsDiv.innerHTML = `
+                        <input type="number" id="vol-dim1" placeholder="Length" value="5" class="w-20 text-center">
+                        <input type="number" id="vol-dim2" placeholder="Width" value="5" class="w-20 text-center">
+                        <input type="number" id="vol-dim3" placeholder="Height" value="5" class="w-20 text-center">
+                    `;
+                } else if (shape === 'sphere') {
+                    inputsDiv.innerHTML = `
+                        <input type="number" id="vol-dim1" placeholder="Radius" value="5" class="w-full text-center">
+                    `;
+                }
+            }
+
+            window.calculateVolume = function() {
+                const shape = document.getElementById('volume-shape').value;
+                const outputEl = document.getElementById('volume-output');
+                let volume = 0;
+                
+                if (shape === 'cube') {
+                    const l = parseFloat(document.getElementById('vol-dim1').value);
+                    const w = parseFloat(document.getElementById('vol-dim2').value);
+                    const h = parseFloat(document.getElementById('vol-dim3').value);
+                    if (isNaN(l) || isNaN(w) || isNaN(h)) return;
+                    volume = l * w * h;
+                } else if (shape === 'sphere') {
+                    const r = parseFloat(document.getElementById('vol-dim1').value);
+                    if (isNaN(r)) return;
+                    volume = (4 / 3) * Math.PI * Math.pow(r, 3);
+                }
+
+                outputEl.textContent = volume.toFixed(2);
+                outputEl.className = 'text-3xl font-extrabold text-red-600';
+            }
+            window.addEventListener('load', () => { window.updateVolumeInputs(); window.calculateVolume(); });
+        })();
+        
+        // --- GAME 19: SIMPLE INVENTORY/STACK MANAGEMENT ---
+        (function() {
+            let stack = ["Plate 1", "Plate 2", "Plate 3"];
+            const displayEl = document.getElementById('stack-display');
+            const messageEl = document.getElementById('stack-message');
+
+            function renderStack() {
+                displayEl.innerHTML = '';
+                if (stack.length === 0) {
+                    displayEl.innerHTML = '<p class="text-gray-400 text-sm italic">Stack is Empty</p>';
+                } else {
+                    stack.slice().reverse().forEach(item => { // Reverse for LIFO visual (top to bottom)
+                        const itemEl = document.createElement('span');
+                        itemEl.className = 'p-1 w-full text-center bg-gray-200 rounded text-sm shadow-md';
+                        itemEl.textContent = item;
+                        displayEl.appendChild(itemEl);
+                    });
+                }
+                messageEl.textContent = `Stack size: ${stack.length}.`;
+            }
+
+            window.pushStack = function() {
+                const inputEl = document.getElementById('stack-input');
+                const item = inputEl.value.trim() || `Item ${stack.length + 1}`;
+                if (stack.length >= 8) {
+                    messageEl.textContent = `Stack is full! (Max 8 items).`;
+                    return;
+                }
+                stack.push(item);
+                inputEl.value = '';
+                renderStack();
+            }
+
+            window.popStack = function() {
+                if (stack.length > 0) {
+                    const poppedItem = stack.pop();
+                    messageEl.textContent = `POPPED: ${poppedItem}.`;
+                } else {
+                    messageEl.textContent = 'ERROR: Stack is empty. Cannot POP.';
+                }
+                renderStack();
+            }
+            window.addEventListener('load', renderStack);
+        })();
+
+        // --- GAME 20: FIBONACCI SEQUENCE CALCULATOR ---
+        (function() {
+            const resultEl = document.getElementById('fib-result');
+            const sequenceEl = document.getElementById('fib-sequence');
+            const indexInput = document.getElementById('fib-index');
+
+            function fibonacci(n) {
+                if (n < 0 || n > 40) return null; 
+                if (n === 0) return 0;
+                if (n === 1) return 1;
+
+                let a = 0, b = 1, temp;
+                let seq = [0, 1];
+
+                for (let i = 2; i <= n; i++) {
+                    temp = a + b;
+                    a = b;
+                    b = temp;
+                    seq.push(temp);
+                }
+                return { value: b, sequence: seq };
+            }
+
+            window.calculateFibonacci = function() {
+                const n = parseInt(indexInput.value);
+
+                if (isNaN(n) || n < 0) {
+                    resultEl.textContent = 'Invalid Index';
+                    sequenceEl.textContent = 'N must be a non-negative integer.';
+                    return;
+                }
+                if (n > 40) {
+                    resultEl.textContent = 'Index Too High';
+                    sequenceEl.textContent = 'Max index is 40 for quick calculation.';
+                    return;
+                }
+
+                const result = fibonacci(n);
+                if (result) {
+                    resultEl.textContent = result.value.toLocaleString();
+                    sequenceEl.textContent = result.sequence.join(', ');
+                }
+            }
+
+            window.addEventListener('load', window.calculateFibonacci);
+        })();
+
+
+        // --- Final Setup ---
+        window.addEventListener('load', () => {
+            // Re-run all load functions to ensure all initial states are set after all scripts are parsed
+            window.updateRegressionPlot();
+            window.drawQuadratic();
+            window.resetHeatSim();
+            window.generateComplement();
+            window.resetArray();
+            window.resetCogSim();
+            window.updateColorMixer();
+            window.applyCipher();
+            window.convertUnit();
+            window.updateShm(true);
+            window.convertToDecimal();
+            window.checkPrime();
+            window.calculateOhm();
+            window.calculatePh();
+            window.addVectors();
+            window.renderRayTrace();
+            window.classifyStar();
+            window.calculateVolume();
+            window.calculateFibonacci();
+        });
+
+    </script>
+</body>
+</html>
